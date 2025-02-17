@@ -13,36 +13,68 @@ class HomeScreen extends StatefulWidget {
 
 class HomeScreenState extends State<HomeScreen> {
   final CardSwiperController controller = CardSwiperController();
-  final DatabaseService _dbService = DatabaseService();
+  late DatabaseService _dbService;
+
+  @override
+  void initState() {
+    super.initState();
+    _dbService = DatabaseService();  // Initialisation du service de base de données
+  }
 
   @override
   void dispose() {
-    controller.dispose();
+    controller.dispose(); // Libération des ressources utilisées par le CardSwiperController
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final currentUser = context.watch<UserModel?>();
-    
-    if (currentUser == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Home')),
       body: StreamBuilder<List<UserModel>>(
         stream: _dbService.getUsersStream(),
         builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
           if (snapshot.hasError) {
-            return const Center(child: Text('Error loading users'));
+            return Center(child: Text('Error: ${snapshot.error}'));
           }
-
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No users available'));
+            return const Center(child: Text('No users available.'));
           }
 
-          final users = snapshot.data!
-       
+          final users = snapshot.data!;
+
+          return Swiper(
+            controller: controller,
+            itemCount: users.length,
+            itemBuilder: (context, index) {
+              final user = users[index];
+              return Card(
+                elevation: 8,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.network(user.profilePicture),
+                    const SizedBox(height: 10),
+                    Text(user.name, style: const TextStyle(fontSize: 18)),
+                    const SizedBox(height: 5),
+                    Text(user.age.toString(),
+                        style: const TextStyle(fontSize: 14)),
+                  ],
+                ),
+              );
+            },
+                  ),
+          );
+        },
+      ),
+    );
+  }
+}

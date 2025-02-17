@@ -7,7 +7,7 @@ import '../screens/home_screen.dart';
 import '../screens/profile_screen.dart';
 import '../models/user_model.dart';
 import '../screens/auth_wrapper.dart';
-import '../services/auth_services.dart';
+import '../services/auth_service.dart';
 import '../services/database_service.dart';
 
 Future<void> main() async {
@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
   final AuthService _authService = AuthService();
   final DatabaseService _dbService = DatabaseService();
 
-  const MyApp({super.key});
+   MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -3,6 +3,7 @@ class UserModel {
       String name;
       String? photoUrl;
       String? bio;
+      int? age;
       List<String>? interests;
       // Add more fields like age, location, etc.
 
@@ -11,6 +12,7 @@ class UserModel {
         required this.name,
         this.photoUrl,
         this.bio,
+        this.age,
         this.interests,
       });
 
@@ -20,6 +22,7 @@ class UserModel {
           name: map['name'],
           photoUrl: map['photoUrl'],
           bio: map['bio'],
+          age: map['age'],
           interests: List<String>.from(map['interests'] ?? []),
         );
       }
@@ -29,6 +32,7 @@ class UserModel {
           'id': id,
           'name': name,
           'photoUrl': photoUrl,
+          'age': age,
           'bio': bio,
           'interests': interests,
         };
