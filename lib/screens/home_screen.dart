@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/database_service.dart';
 import '../models/user_model.dart';
-import 'package:flutter_card_swiper/flutter_card_swiper.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_card_swiper/flutter_card_swiper.dart'; // Assurez-vous que l'importation est correcte
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,7 +17,7 @@ class HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _dbService = DatabaseService();  // Initialisation du service de base de données
+    _dbService = DatabaseService(); // Initialisation du service de base de données
   }
 
   @override
@@ -29,8 +28,6 @@ class HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currentUser = context.watch<UserModel?>();
-
     return Scaffold(
       appBar: AppBar(title: const Text('Home')),
       body: StreamBuilder<List<UserModel>>(
@@ -48,10 +45,10 @@ class HomeScreenState extends State<HomeScreen> {
 
           final users = snapshot.data!;
 
-          return Swiper(
+          return CardSwiper(
             controller: controller,
-            itemCount: users.length,
-            itemBuilder: (context, index) {
+            cardsCount: users.length,
+            cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
               final user = users[index];
               return Card(
                 elevation: 8,
@@ -61,17 +58,15 @@ class HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.network(user.profilePicture),
+                    Image.network(user.photoUrl), // Assurez-vous que le champ s'appelle bien `imageUrl`
                     const SizedBox(height: 10),
                     Text(user.name, style: const TextStyle(fontSize: 18)),
                     const SizedBox(height: 5),
-                    Text(user.age.toString(),
-                        style: const TextStyle(fontSize: 14)),
+                    Text(user.age.toString(), style: const TextStyle(fontSize: 14)),
                   ],
                 ),
               );
             },
-                  ),
           );
         },
       ),

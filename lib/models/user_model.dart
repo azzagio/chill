@@ -1,7 +1,7 @@
 class UserModel {
       String id;
       String name;
-      String? photoUrl;
+      String photoUrl;
       String? bio;
       int? age;
       List<String>? interests;
@@ -10,7 +10,7 @@ class UserModel {
       UserModel({
         required this.id,
         required this.name,
-        this.photoUrl,
+        required this.photoUrl,
         this.bio,
         this.age,
         this.interests,

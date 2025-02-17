@@ -1,80 +1,66 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
-import '../screens/login_screen.dart';
-import '../screens/home_screen.dart';
-import '../screens/profile_screen.dart';
-import '../models/user_model.dart';
-import '../screens/auth_wrapper.dart';
 import '../services/auth_service.dart';
-import '../services/database_service.dart';
 
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(MyApp());
-
-}
-final _router = GoRouter(
-  routes: [
-     GoRoute(
-      path: '/',
-      builder: (context, state) => const AuthWrapper(),
-    ),
-     GoRoute(
-      path: '/login',
-      builder: (context, state) =>  LoginScreen(),
-    ),
-     GoRoute(
-      path: '/home',
-      builder: (context, state) => const HomeScreen(),
-    ),
-     GoRoute(
-      path: '/profile', 
-      builder: (context, state) =>  ProfileScreen(),
-    ),
-    
-  ],
-);
-
-class MyApp extends StatelessWidget {
-  final AuthService _authService = AuthService();
-  final DatabaseService _dbService = DatabaseService();
-
-   MyApp({super.key});
+class LoginScreen extends StatelessWidget {
+  const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        StreamProvider<UserModel?>.value(
-          value: _authService.authStateChanges.asyncMap((user) async {
-            if (user == null) {
-              return null;
-            }
-            final data = await _dbService.getUser(user.uid);
-            if (data != null) {
-              return data;
-            } else {
-              final userNew = UserModel(
-                id: user.uid,
-                name: user.displayName ?? 'User',
-              );
-              await _dbService.createUser(userNew);
-              return userNew;
-            }
-          }),
-          initialData: null,
+    final authService = Provider.of<AuthService>(context, listen: false);
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Login')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Welcome to Dating App',
+              style: TextStyle(fontSize: 24),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () async {
+                try {
+                  await authService.signInWithGoogle();
+                  if (!context.mounted) return; // Vérification avant d'utiliser context
+                  Navigator.pushReplacementNamed(context, '/home');
+                } on FirebaseAuthException catch (e) {
+                  if (!context.mounted) return;
+                  String errorMessage = 'Login failed.';
+                  if (e.code == 'user-not-found') {
+                    errorMessage = 'No user found for that email.';
+                  } else if (e.code == 'wrong-password') {
+                    errorMessage = 'Wrong password provided for that user.';
+                  } else if (e.code == 'invalid-credential') {
+                    errorMessage = 'Invalid credential';
+                  } else {
+                    errorMessage = 'Login failed. Code: ${e.code}';
+                  }
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(errorMessage)),
+                  );
+                } catch (e) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('An unexpected error occurred: $e')),
+                  );
+                }
+              },
+              child: const Text('Login with Google'),
+            ),
+            const SizedBox(height: 20),
+            TextButton(
+              onPressed: () {
+                if (!context.mounted) return;
+                Navigator.pushNamed(context, '/signup');
+              },
+              child: const Text('Sign Up'),
+            ),
+          ],
         ),
-      ],
-      child: MaterialApp.router(
-        title: 'Dating App',
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.pink),
-        ),
-        routerConfig: _router,
       ),
     );
   }
