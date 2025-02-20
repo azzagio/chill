@@ -19,3 +19,7 @@ subprojects {
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
+dependencies {
+        classpath 'com.android.tools.build:gradle:8.0.2'
+}
+
